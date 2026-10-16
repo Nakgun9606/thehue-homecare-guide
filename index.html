@@ -351,6 +351,22 @@ h1, h2, h3, .card h3, .rt strong, .fd-row strong, .link-card strong, .sub { lett
   .link-card strong { font-size: 19px; }
   .link-card .go { padding-top: 4px; }
 }
+
+/* PC에서도 넘기기: 보이는 가로 스크롤바 + 이전/다음 버튼 + 마우스 드래그 */
+.latest { scrollbar-width: thin; scrollbar-color: var(--accent) var(--line); padding-bottom: 12px; }
+.latest::-webkit-scrollbar { display: block; height: 8px; }
+.latest::-webkit-scrollbar-track { background: var(--line); border-radius: 999px; }
+.latest::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 999px; }
+.latest a { user-select: none; -webkit-user-drag: none; }
+.latest img { -webkit-user-drag: none; pointer-events: none; }
+@media (hover: hover) and (pointer: fine) { .latest { cursor: grab; } .latest.dragging { cursor: grabbing; scroll-snap-type: none; } }
+.channel .latest-hint { justify-content: space-between; max-width: none; }
+.latest-hint::after { content: none; }
+.lh-btns { display: none; gap: 8px; }
+.lh-b { font: inherit; font-size: 22px; line-height: 1; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--surface); color: var(--accent); cursor: pointer; display: grid; place-items: center; padding: 0 0 3px; }
+.lh-b:hover:not(:disabled) { border-color: var(--accent); }
+.lh-b:disabled { opacity: .35; cursor: default; }
+@media (hover: hover) and (pointer: fine) { .lh-btns { display: flex; } }
 </style>
 </head>
 <body>
@@ -624,8 +640,38 @@ function channel() {
     if (CHANNEL_VIDEOS.length > 1 && !document.getElementById("latestHint")) {
       var hint = document.createElement("p");
       hint.className = "latest-hint"; hint.id = "latestHint";
-      hint.textContent = "옆으로 넘겨서 더 보기";
+      hint.innerHTML = '<span class="lh-t">옆으로 넘겨서 더 보기</span><span class="lh-btns"><button type="button" class="lh-b" data-dir="-1" aria-label="이전 영상">‹</button><button type="button" class="lh-b" data-dir="1" aria-label="다음 영상">›</button></span>';
       el.insertAdjacentElement("afterend", hint);
+      hint.addEventListener("click", function (e) {
+        var b = e.target.closest(".lh-b"); if (!b) return;
+        var step = (el.querySelector("a") ? el.querySelector("a").getBoundingClientRect().width + 12 : 280) * Number(b.getAttribute("data-dir"));
+        el.scrollBy({ left: step, behavior: reduceMotion() ? "auto" : "smooth" });
+      });
+      /* 마우스로 끌어서 넘기기 */
+      var drag = null, moved = false;
+      el.addEventListener("pointerdown", function (e) {
+        if (e.pointerType !== "mouse" || e.button !== 0) return;
+        drag = { x: e.clientX, left: el.scrollLeft }; moved = false;
+      });
+      window.addEventListener("pointermove", function (e) {
+        if (!drag) return;
+        var dx = e.clientX - drag.x;
+        if (Math.abs(dx) > 4 && !moved) { moved = true; el.classList.add("dragging"); }
+        if (moved) el.scrollLeft = drag.left - dx;
+      });
+      window.addEventListener("pointerup", function () {
+        if (!drag) return; drag = null; el.classList.remove("dragging");
+      });
+      el.addEventListener("click", function (e) { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+      el.addEventListener("dragstart", function (e) { e.preventDefault(); });
+      var upd = function () {
+        var max = el.scrollWidth - el.clientWidth;
+        hint.querySelector('[data-dir="-1"]').disabled = el.scrollLeft <= 2;
+        hint.querySelector('[data-dir="1"]').disabled = el.scrollLeft >= max - 2;
+      };
+      el.addEventListener("scroll", upd, { passive: true });
+      window.addEventListener("resize", upd);
+      setTimeout(upd, 100);
     }
     el.innerHTML = CHANNEL_VIDEOS.map(function (v) {
       var th = thumbOf(v);
