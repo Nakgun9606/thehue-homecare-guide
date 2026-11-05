@@ -333,6 +333,7 @@ h1, h2, h3, .card h3, .rt strong, .fd-row strong, .link-card strong, .sub { lett
 .em-card .em-sub { font-size: 14px; }
 
 /* 영상 썸네일 */
+.local-video { width: min(100%, 360px); aspect-ratio: 9 / 16; justify-self: center; border-radius: 14px; background: #000; }
 .vthumb { position: relative; display: block; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; background: linear-gradient(140deg, var(--hero-a), var(--hero-b)); text-decoration: none; border: 1px solid var(--line); }
 .vthumb .vbg { position: absolute; inset: -12%; background-size: cover; background-position: center; filter: blur(18px) brightness(.65); }
 .vthumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
@@ -524,7 +525,7 @@ var VIDEOS = [
   { cat: "약·주사·급여", title: "안약·안연고 넣는 법", id: "eye", tags: "안약 안연고 눈 눈곱 충혈 각막 각막염 결막염 백내장 녹내장 눈병 눈물 눈 수술 점안 눈 비빔 눈 못 뜸 연고", target: "각막염, 결막염, 눈 수술 후 아이", who: "테크니션·간호사", url: "",
     steps: [["턱을 받치고 눈꺼풀 살짝 올리기", "눈 위를 누르지 않기"], ["안약 한 방울 넣기", "병 끝이 눈이나 눈썹에 닿지 않게"], ["깜빡이게 두고 흘러넘친 것 닦기", "안약이 여러 종류면 5분 이상 간격 두기"]],
     alert: "눈을 못 뜰 때, 눈곱이나 충혈이 심해질 때, 눈이 하얗게 흐려질 때" },
-  { cat: "건강 체크", title: "집에서 호흡수 재는 법", id: "resp", tags: "호흡수 숨 호흡 심장 심장병 심부전 기침 숨쉬기 헐떡 헐떡임 수면호흡수 승모판 판막 폐수종 호흡곤란 숨 가쁨 가쁜 숨 체크 확인 심장수술 심장 약", target: "심장병·심부전으로 관리 중인 아이", who: "수의사", url: "",
+  { cat: "건강 체크", title: "집에서 호흡수 재는 법", id: "resp", tags: "호흡수 숨 호흡 심장 심장병 심부전 기침 숨쉬기 헐떡 헐떡임 수면호흡수 승모판 판막 폐수종 호흡곤란 숨 가쁨 가쁜 숨 체크 확인 심장수술 심장 약", target: "심장병·심부전으로 관리 중인 아이", who: "수의사", url: "respiratory-rate.mp4",
     steps: [["아이가 편하게 자고 있을 때 확인", "깨워서 재지 않기"], ["가슴이 올라갔다 내려오면 1번으로 세기", "들숨과 날숨을 합쳐 1번"], ["1분간 세어 기록하기", "매일 같은 시간, 같은 상태에서"]],
     alert: "병원에서 안내받은 기준을 넘을 때, 입을 벌리고 숨 쉴 때, 잇몸이 보랏빛이거나 창백할 때" },
   { cat: "수술 후·재활", title: "수술 후 상처·배액관·넥칼라 관리", id: "postop", tags: "수술 후 수술 상처 봉합 실밥 배액관 넥칼라 엘리자베스칼라 칼라 소독 퇴원 수술 부위 핥음 핥아요 진물 붓기 수술 관리 중성화 골절 십자인대 디스크 수술 대퇴골 종양 제거 수술 퇴원", target: "수술 후 퇴원하는 모든 아이", who: "테크니션·간호사", url: "",
@@ -565,11 +566,15 @@ function thumbOf(v) {
 }
 function card(v) {
   var th = thumbOf(v);
-  var action = v.url
-    ? '<a class="vthumb" href="' + esc(v.url) + '" target="_blank" rel="noopener" aria-label="' + esc(v.title) + ' 영상 보기">' +
-      (th ? '<span class="vbg" style="background-image:url(\'' + esc(th) + '\')"></span><img src="' + esc(th) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '') +
-      '<span class="vplay">' + PLAY + '</span><span class="vcap">영상 보기</span></a>'
-    : '<p class="soon">영상은 곧 올라와요. 아래 순서를 먼저 확인해 보세요.</p>';
+  var action = /\.mp4(?:[?#]|$)/i.test(v.url)
+    ? '<video class="local-video" controls playsinline preload="metadata" aria-label="' + esc(v.title) + ' 영상">' +
+      '<source src="' + esc(v.url) + '" type="video/mp4">' +
+      '이 브라우저에서는 영상을 재생할 수 없습니다.</video>'
+    : v.url
+      ? '<a class="vthumb" href="' + esc(v.url) + '" target="_blank" rel="noopener" aria-label="' + esc(v.title) + ' 영상 보기">' +
+        (th ? '<span class="vbg" style="background-image:url(\'' + esc(th) + '\')"></span><img src="' + esc(th) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '') +
+        '<span class="vplay">' + PLAY + '</span><span class="vcap">영상 보기</span></a>'
+      : '<p class="soon">영상은 곧 올라와요. 아래 순서를 먼저 확인해 보세요.</p>';
   var steps = v.steps.map(function (s, i) {
     return '<li><span class="s">' + (i + 1) + '</span><span>' + esc(s[0]) + '<span class="cap">' + esc(s[1]) + '</span></span></li>';
   }).join("");
