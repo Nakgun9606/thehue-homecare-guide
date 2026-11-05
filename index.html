@@ -567,7 +567,7 @@ function thumbOf(v) {
 function card(v) {
   var th = thumbOf(v);
   var action = /\.mp4(?:[?#]|$)/i.test(v.url)
-    ? '<video class="local-video" controls playsinline preload="metadata" aria-label="' + esc(v.title) + ' 영상">' +
+    ? '<video class="local-video" controls playsinline preload="metadata" poster="respiratory-rate-poster.jpg" aria-label="' + esc(v.title) + ' 영상">' +
       '<source src="' + esc(v.url) + '" type="video/mp4">' +
       '이 브라우저에서는 영상을 재생할 수 없습니다.</video>'
     : v.url
