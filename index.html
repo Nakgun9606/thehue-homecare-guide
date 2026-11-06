@@ -334,12 +334,16 @@ h1, h2, h3, .card h3, .rt strong, .fd-row strong, .link-card strong, .sub { lett
 
 /* 영상 썸네일 */
 .local-video { width: min(100%, 360px); aspect-ratio: 9 / 16; justify-self: center; border-radius: 14px; background: #000; }
-.speed-control { width: min(100%, 360px); justify-self: center; display: flex; align-items: center; justify-content: flex-end; gap: 8px; font-size: 13px; color: var(--muted); }
-.speed-select { min-height: 36px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--fg); font: inherit; cursor: pointer; }
-.video-options { width: min(100%, 360px); justify-self: center; display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
-.video-options .speed-control { width: auto; }
-.caption-toggle { min-height: 36px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--fg); font: inherit; cursor: pointer; }
+.video-options { width: min(100%, 360px); justify-self: center; display: grid; gap: 10px; padding: 10px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.caption-toggle { justify-self: start; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--fg); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.caption-toggle .cc-mark { display: inline-grid; place-items: center; min-width: 27px; min-height: 22px; padding: 0 4px; border: 1px solid currentColor; border-radius: 5px; font-size: 11px; letter-spacing: .03em; }
 .caption-toggle[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
+.speed-control { display: grid; gap: 7px; min-width: 0; }
+.speed-label { color: var(--muted); font-size: 12px; font-weight: 700; }
+.speed-buttons { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 10px; background: var(--bg); }
+.speed-button { min-width: 0; min-height: 38px; padding: 4px 1px; border: 0; border-radius: 7px; background: transparent; color: var(--muted); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.speed-button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.caption-toggle:focus-visible, .speed-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .local-video::cue { background: rgba(0, 0, 0, .78); color: #fff; }
 .vthumb { position: relative; display: block; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; background: linear-gradient(140deg, var(--hero-a), var(--hero-b)); text-decoration: none; border: 1px solid var(--line); }
 .vthumb .vbg { position: absolute; inset: -12%; background-size: cover; background-position: center; filter: blur(18px) brightness(.65); }
@@ -581,9 +585,10 @@ function card(v) {
       (v.captions ? '<track kind="captions" src="' + esc(v.captions) + '" srclang="ko" label="한국어">' : '') +
       '이 브라우저에서는 영상을 재생할 수 없습니다.</video>' +
       '<div class="video-options">' +
-      (v.captions ? '<button type="button" class="caption-toggle" aria-pressed="false" aria-label="' + esc(v.title) + ' 한국어 자막 켜기">CC 자막 켜기</button>' : '') +
-      '<label class="speed-control">재생 속도 <select class="speed-select" aria-label="' + esc(v.title) + ' 재생 속도">' +
-      '<option value="0.75">0.75배</option><option value="1" selected>1배</option><option value="1.25">1.25배</option><option value="1.5">1.5배</option><option value="2">2배</option></select></label></div>'
+      (v.captions ? '<button type="button" class="caption-toggle" aria-pressed="false" aria-label="' + esc(v.title) + ' 한국어 자막 켜기"><span class="cc-mark" aria-hidden="true">CC</span><span class="cc-label">자막 켜기</span></button>' : '') +
+      '<div class="speed-control" role="group" aria-label="' + esc(v.title) + ' 재생 속도"><span class="speed-label">재생 속도</span><div class="speed-buttons">' +
+      [0.75, 1, 1.25, 1.5, 2].map(function (rate) { return '<button type="button" class="speed-button" data-rate="' + rate + '" aria-pressed="' + (rate === 1) + '">' + rate + '배</button>'; }).join("") +
+      '</div></div></div>'
     : v.url
       ? '<a class="vthumb" href="' + esc(v.url) + '" target="_blank" rel="noopener" aria-label="' + esc(v.title) + ' 영상 보기">' +
         (th ? '<span class="vbg" style="background-image:url(\'' + esc(th) + '\')"></span><img src="' + esc(th) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '') +
@@ -724,14 +729,22 @@ document.getElementById("grid").addEventListener("click", function (e) {
   var showing = video.textTracks[0].mode !== "showing";
   video.textTracks[0].mode = showing ? "showing" : "disabled";
   button.setAttribute("aria-pressed", String(showing));
-  button.textContent = showing ? "CC 자막 끄기" : "CC 자막 켜기";
+  button.querySelector(".cc-label").textContent = showing ? "자막 끄기" : "자막 켜기";
   button.setAttribute("aria-label", video.getAttribute("aria-label") + (showing ? " 한국어 자막 끄기" : " 한국어 자막 켜기"));
 });
-document.getElementById("grid").addEventListener("change", function (e) {
-  if (!e.target.matches(".speed-select")) return;
-  var video = e.target.closest(".rb").querySelector("video");
-  if (video) video.playbackRate = Number(e.target.value);
+document.getElementById("grid").addEventListener("click", function (e) {
+  var button = e.target.closest(".speed-button");
+  if (!button) return;
+  var video = button.closest(".rb").querySelector("video");
+  if (video) video.playbackRate = Number(button.getAttribute("data-rate"));
 });
+document.getElementById("grid").addEventListener("ratechange", function (e) {
+  if (e.target.tagName !== "VIDEO") return;
+  var group = e.target.closest(".rb").querySelector(".speed-buttons");
+  group.querySelectorAll(".speed-button").forEach(function (button) {
+    button.setAttribute("aria-pressed", String(Number(button.getAttribute("data-rate")) === e.target.playbackRate));
+  });
+}, true);
 document.getElementById("quick").addEventListener("click", function (e) {
   var b = e.target.closest(".q"); if (!b) return;
   var w = b.getAttribute("data-q");
