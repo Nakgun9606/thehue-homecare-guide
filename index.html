@@ -693,6 +693,21 @@ function channel() {
   }
 }
 
+document.getElementById("grid").addEventListener("toggle", function (e) {
+  var details = e.target;
+  if (details.tagName !== "DETAILS") return;
+  if (details.open) {
+    document.querySelectorAll("#grid details[open]").forEach(function (other) {
+      if (other === details) return;
+      var video = other.querySelector("video");
+      if (video) video.pause();
+      other.open = false;
+    });
+  } else {
+    var video = details.querySelector("video");
+    if (video) video.pause();
+  }
+}, true);
 document.getElementById("grid").addEventListener("change", function (e) {
   if (!e.target.matches(".speed-select")) return;
   var video = e.target.closest(".rb").querySelector("video");
