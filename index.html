@@ -510,7 +510,7 @@ var CHANNEL_VIDEOS = [
 
 /* 홈케어 영상: url에 유튜브 주소를 붙여넣으면 "영상 보기" 버튼이 켜집니다. */
 var VIDEOS = [
-  { cat: "수액·배뇨", title: "피하수액 놓는 법", id: "fluid", tags: "수액 링거 피하수액 피하주사 신장 신부전 콩팥 신장병 탈수 만성신부전 노령묘 늙은 고양이 주사 바늘 수액 놓기 수액 맞히기 물 많이 마심 구토 신장수치", target: "만성 신부전 고양이, 탈수가 반복되는 아이", who: "테크니션·간호사", url: "",
+  { cat: "수액·배뇨", title: "피하수액 놓는 법", id: "fluid", tags: "수액 링거 피하수액 피하주사 신장 신부전 콩팥 신장병 탈수 만성신부전 노령묘 늙은 고양이 주사 바늘 수액 놓기 수액 맞히기 물 많이 마심 구토 신장수치", target: "만성 신부전 고양이, 탈수가 반복되는 아이", who: "테크니션·간호사", url: "subcutaneous-fluids.mp4", poster: "subcutaneous-fluids-poster.jpg",
     steps: [["수액 라인 연결, 공기 빼기", "차가운 수액 그대로 놓지 않기"], ["등 피부를 텐트처럼 들어 바늘 삽입", "근육 쪽으로 깊게 찌르지 않기"], ["수액 주입하며 쓰다듬기", "심하게 움직이면 멈추고 다시 시작"]],
     alert: "수액이 계속 새거나 피부가 붓고 아파할 때, 주입 후 구토하거나 축 처질 때" },
   { cat: "수액·배뇨", title: "압박배뇨 하는 법", id: "urine", tags: "압박배뇨 배뇨 소변 오줌 쉬 방광 마비 하반신마비 뒷다리 마비 척수 척수손상 디스크 허리 허리디스크 신경 못 걷는 휠체어 배뇨곤란 소변 못 봄 소변 안 나옴 요폐 짜주기", target: "척수손상, 디스크 수술 후, 스스로 소변을 못 보는 아이", who: "테크니션·간호사", url: "",
@@ -525,7 +525,7 @@ var VIDEOS = [
   { cat: "약·주사·급여", title: "안약·안연고 넣는 법", id: "eye", tags: "안약 안연고 눈 눈곱 충혈 각막 각막염 결막염 백내장 녹내장 눈병 눈물 눈 수술 점안 눈 비빔 눈 못 뜸 연고", target: "각막염, 결막염, 눈 수술 후 아이", who: "테크니션·간호사", url: "",
     steps: [["턱을 받치고 눈꺼풀 살짝 올리기", "눈 위를 누르지 않기"], ["안약 한 방울 넣기", "병 끝이 눈이나 눈썹에 닿지 않게"], ["깜빡이게 두고 흘러넘친 것 닦기", "안약이 여러 종류면 5분 이상 간격 두기"]],
     alert: "눈을 못 뜰 때, 눈곱이나 충혈이 심해질 때, 눈이 하얗게 흐려질 때" },
-  { cat: "건강 체크", title: "집에서 호흡수 재는 법", id: "resp", tags: "호흡수 숨 호흡 심장 심장병 심부전 기침 숨쉬기 헐떡 헐떡임 수면호흡수 승모판 판막 폐수종 호흡곤란 숨 가쁨 가쁜 숨 체크 확인 심장수술 심장 약", target: "심장병·심부전으로 관리 중인 아이", who: "수의사", url: "respiratory-rate.mp4",
+  { cat: "건강 체크", title: "집에서 호흡수 재는 법", id: "resp", tags: "호흡수 숨 호흡 심장 심장병 심부전 기침 숨쉬기 헐떡 헐떡임 수면호흡수 승모판 판막 폐수종 호흡곤란 숨 가쁨 가쁜 숨 체크 확인 심장수술 심장 약", target: "심장병·심부전으로 관리 중인 아이", who: "수의사", url: "respiratory-rate.mp4", poster: "respiratory-rate-poster.jpg",
     steps: [["아이가 편하게 자고 있을 때 확인", "깨워서 재지 않기"], ["가슴이 올라갔다 내려오면 1번으로 세기", "들숨과 날숨을 합쳐 1번"], ["1분간 세어 기록하기", "매일 같은 시간, 같은 상태에서"]],
     alert: "병원에서 안내받은 기준을 넘을 때, 입을 벌리고 숨 쉴 때, 잇몸이 보랏빛이거나 창백할 때" },
   { cat: "수술 후·재활", title: "수술 후 상처·배액관·넥칼라 관리", id: "postop", tags: "수술 후 수술 상처 봉합 실밥 배액관 넥칼라 엘리자베스칼라 칼라 소독 퇴원 수술 부위 핥음 핥아요 진물 붓기 수술 관리 중성화 골절 십자인대 디스크 수술 대퇴골 종양 제거 수술 퇴원", target: "수술 후 퇴원하는 모든 아이", who: "테크니션·간호사", url: "",
@@ -567,7 +567,9 @@ function thumbOf(v) {
 function card(v) {
   var th = thumbOf(v);
   var action = /\.mp4(?:[?#]|$)/i.test(v.url)
-    ? '<video class="local-video" controls playsinline preload="metadata" poster="respiratory-rate-poster.jpg" aria-label="' + esc(v.title) + ' 영상">' +
+    ? '<video class="local-video" controls playsinline preload="metadata"' +
+      (v.poster ? ' poster="' + esc(v.poster) + '"' : '') +
+      ' aria-label="' + esc(v.title) + ' 영상">' +
       '<source src="' + esc(v.url) + '" type="video/mp4">' +
       '이 브라우저에서는 영상을 재생할 수 없습니다.</video>'
     : v.url
